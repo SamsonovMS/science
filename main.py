@@ -6,6 +6,7 @@ See full explanation https://docs.google.com/document/d/
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import ode
 
@@ -13,25 +14,39 @@ from scipy.integrate import ode
 def fun(t, _y, f_args):
     """
     Right hand side of the differential equations
+
     dx/dt = w_x
     dy/dt = w_y
     dz/dt = w_z
     dw_x/dt = (E_x + delta*(b_z*w_y - w_z*b_y))/theta
     dw_y/dt = (E_y + delta*(b_x*w_z - w_x*b_z))/theta
     dw_z/dt = (E_z + delta*(b_y*w_x - w_y*b_x))/theta
+    
+    Plasmoid is rotated around a point (x_axis, z_axis) on the corner angle.
     """
     x, y, z, w_x, w_y, w_z = _y
-    delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2 = f_args
+    delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis = f_args
     e_x = 0.0
     e_y = 0.0
     e_z = 0.0
-    b_x = np.tanh(z / d)
+    # take rotation into account
+    r_point = np.sqrt(np.power(x - x_axis, 2) + np.power(z - z_axis, 2))
+    a_point = np.arctan(float(z - z_axis) / (x - x_axis))
+    x_plasm = x_axis + r_point * np.cos(a_point - angle)
+    z_plasm = z_axis + r_point * np.sin(a_point - angle)
+    b_x = np.tanh(float(z_plasm) / d)
     b_y = 0.0
-    b_z = np.tanh(x / dh)
-    if x < XM:
-        b_z += -bz0 * np.tanh((x - XO) / dx1)
+    b_z = np.tanh(x / dh)  # shock wave
+    if x_plasm < XM: # change +/- here
+        b_z += -bz0 * np.tanh((x_plasm - XO) / dx1)
     else:
-        b_z += bz2 * np.tanh((x - XNL) / dx2)
+        b_z += bz2 * np.tanh((x_plasm - XNL) / dx2)
+    r_value = np.sqrt(np.power(b_x, 2) + np.power(b_z, 2))
+    a_value = np.arctan(b_z / b_x)
+    if b_x < 0:
+        a_value = np.pi + a_value
+    b_x = r_value*np.cos(a_value + angle)
+    b_z = r_value*np.sin(a_value + angle)
     return [w_x, w_y, w_z,
             (e_x + delta * (b_z * w_y - w_z * b_y)) / theta,
             (e_y + delta * (b_x * w_z - w_x * b_z)) / theta,
@@ -55,21 +70,24 @@ bz0 = 1.0  # ?
 XO = 7.0  # ?
 XM = 12.0
 XNL = 15.0
+angle = 0.24
+x_axis = -6.0
+z_axis = 0.0
 bz2 = bz0 * np.tanh((XM - XO) / dx1) / np.tanh((XNL - XM) / dx2)
-f_args = (delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2)
+f_args = (delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis)
 solver.set_f_params(f_args)
 
 # Number of time steps.
-n_steps = 300
+n_steps = 3000
 
 # Create the array `t` of time values at which to compute
 # the solution.
 t0 = 0.0
-t1 = 500
+t1 = 2000
 t = np.linspace(t0, t1, n_steps)
 
 # Number of particles.
-n_part = 10
+n_part = 1
 
 # Create an array to hold the solutions.
 sol = [np.empty((n_steps, 6)) for j in range(n_part)]
@@ -78,7 +96,8 @@ for i in range(n_part):
     # Set the initial value _y(0) = _y0.
     _y0 = [[] for j in range(6)]
     _y0[:3] = 10 * (np.random.random_sample(3) - np.random.random_sample(3))
-    _y0[3:] = (np.random.random_sample(3) - np.random.random_sample(3)) / 10
+    _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)) / 10
+    _y0[4:] = (np.random.random_sample(2) - np.random.random_sample(2)) / 10
     solver.set_initial_value(_y0, t0)
 
     # Put the initial value in the solutions array.
@@ -91,6 +110,25 @@ for i in range(n_part):
         solver.integrate(t[k])
         sol[i][k] = solver.y
         k += 1
+'''
+# Animation
+fig, ax = plt.subplots()
+fig.set_tight_layout(True)
+
+# Plot initial positions of particles
+scat = ax.scatter(sol[0][:, 0], sol[0][:, 1], sol[0][:, 2])
+plt.show()
+
+
+def update(i):
+    label = 'timestep {0}'.format(i)
+    print(label)
+    # Update the line and the axes (with a new xlabel). Return a tuple of
+    # "artists" that have to be redrawn for this frame.
+    ax.set_xlabel(label)
+    return ax
+'''
+
 
 # Plot the solutions.
 fig = plt.figure()
