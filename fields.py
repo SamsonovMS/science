@@ -42,7 +42,7 @@ def shock_wave(num, x, z, dh=0.75, n=10, scale=300):
     return u, v, m
 
 
-def plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2):
+def plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2):
     """
     Magnetic field of a structure in the solar wind.
     :param xm: https://docs.google.com/document/d/1Uebu5muzgRV0MCNWihRWR2x5Dqxgk6k5Sj-HnUkoc_M/edit#bookmark=id.gnczmv5jbq8u
@@ -64,25 +64,26 @@ def plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2):
             bz[i] = bz2*np.tanh((xi - xnl)/dx2)
 
     u, v = np.meshgrid(x, z)
-    for i in range(num[2]):
-        for j in range(num[0]):
+    for i in range(len(z)):
+        for j in range(len(x)):
             u[i][j] = bx[i]
             v[i][j] = bz[j]
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-
     return u, v, m
 
 
-def rotate_plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axis=-6.0, z_axis=0.0):
+def rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axis=-6.0, z_axis=0.0):
     """
     Rotation of plasmoid around (x_axis, z_axis) on angle a.
     """
     u, v = np.meshgrid(x, z)
-    for i in range(num[2]): #z
-        for j in range(num[0]): #x
+    for i in range(len(z)):
+        for j in range(len(x)):
             r_point = np.sqrt(np.power(x[j] - x_axis, 2)\
                               + np.power(z[i] - z_axis, 2))
             a_point = np.arctan(float(z[i] - z_axis)/(x[j] - x_axis))
+            if x[j] < x_axis:
+                a_point += np.pi
             z_plasm = z_axis + r_point*np.sin(a_point - a)
             b_x = np.tanh(float(z_plasm)/d)
             x_plasm = x_axis + r_point*np.cos(a_point - a)
@@ -97,10 +98,11 @@ def rotate_plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axi
             u[i][j] = r_value*np.cos(a_value + a)
             v[i][j] = r_value*np.sin(a_value + a)
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    quiver_(x, z, u, v, m)
     return u, v, m
 
 
-def summ_fields(x, z, uh, vh, ur, vr, case):
+def summ_fields(uh, vh, ur, vr, case):
     """
     Two cases.
     """
@@ -115,14 +117,10 @@ def summ_fields(x, z, uh, vh, ur, vr, case):
     return u, v, m
 
 
-def main(case=True):
+def main(num, x, z, case):
     """
-    Calc and show shock wavep, lasmoid, rotated plasmoid and its summ with the shock wave in two cases.
+    Calc and show shock wave, plasmoid, rotated plasmoid and its summ with the shock wave in two cases.
     """
-    num = [400, 0, 200]
-    x = np.linspace(-5, 10, num=num[0])
-    z = np.linspace(-5, 5, num=num[2])
-
     uh, vh, mh = shock_wave(num, x, z, dh=0.75, n=10, scale=300)
 
     d = 0.75
@@ -134,10 +132,10 @@ def main(case=True):
     xnl = 15.0
     bz2 = bz0 * np.tanh((xm - xo) / dx1) / np.tanh((xnl - xm) / dx2)
 
-    plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2)
-    ur, vr, mr = rotate_plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.30, x_axis=-6.0, z_axis=-3.0)
-    u, v, m = summ_fields(x, z, uh, vh, ur, vr, case)
-    return x, z, u, v, m
+    plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2)
+    ur, vr, mr = rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=-np.pi/6, x_axis=-6.0, z_axis=-3.0)
+    u, v, m = summ_fields(uh, vh, ur, vr, case)
+    return u, v, m
 
 
 if __name__ == "__main__":

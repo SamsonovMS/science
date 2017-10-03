@@ -96,7 +96,7 @@ def traces(case, n_steps=300, n_part=1, t_coeff=0.5):
         # Set the initial value _y(0) = _y0.
         _y0 = [[] for j in range(6)]
         _y0[:3] = 10 * (np.random.random_sample(3) - np.random.random_sample(3))
-        _y0[3] = (np.random.random_sample(1)*4 - np.random.random_sample(1)) / 10
+        _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)*4) / 3
         _y0[4:] = (np.random.random_sample(2) - np.random.random_sample(2)) / 10
         solver.set_initial_value(_y0, 0.0)
 

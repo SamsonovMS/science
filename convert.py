@@ -17,7 +17,11 @@ def sol_to_xyz(sol, n_steps, n_part):
     return ret
 
 
-def field_to_surface():
+def field_to_surface(num, x, z, m):
     """
-    For plotting contourf.
+    For drawing in animate.py a 2D sketch of magnetic field without directions, only
+    amplitudes.
+    TypeError: Shape of x does not match that of z: found (200, 200) instead of (200, 400).
     """
+    xx, zz = np.meshgrid(x, z)
+    return xx, m, zz
