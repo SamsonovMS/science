@@ -8,9 +8,11 @@ import calc
 import convert
 import fields
 
+
 case = 1
 
-fields.main(case=case)
+x, z, u, v, m = fields.main(case=case)
+fields.quiver_(x, z, u, v, m)
 
 n_steps = 300
 n_part = 3
@@ -38,5 +40,11 @@ graph, = ax.plot(data.x, data.y, data.z, linestyle="", marker="o")
 
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, n_steps - 1,
                                interval=1, blit=False)
+
+x = np.linspace(0, 1, 100)
+y = np.sin(x * 2 * np.pi) / 2 + 0.5
+ax.plot(x, y, zs=0, zdir='z', label='curve in (x,y)')
+
+ax.view_init(elev=0., azim=0)
 
 plt.show()

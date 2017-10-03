@@ -15,3 +15,9 @@ def sol_to_xyz(sol, n_steps, n_part):
         for part in range(n_part):
             ret[step*n_part + part] = sol[part][step][:3]
     return ret
+
+
+def field_to_surface():
+    """
+    For plotting contourf.
+    """

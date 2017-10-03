@@ -6,15 +6,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def quiver_(x, z, U, V, m, n=10, scale=False):
+def quiver_(x, z, u, v, m, n=8, scale=False):
     """
-    Helper function for visualisations.
+    Function for visualisations.
     """
     if scale:
-        plt.quiver(x[::n], z[::n], U[::n, ::n], V[::n, ::n], m[::n, ::n],
+        plt.quiver(x[::n], z[::n], u[::n, ::n], v[::n, ::n], m[::n, ::n],
                    scale=scale)
     else:
-        plt.quiver(x[::n], z[::n], U[::n, ::n], V[::n, ::n], m[::n, ::n],
+        plt.quiver(x[::n], z[::n], u[::n, ::n], v[::n, ::n], m[::n, ::n],
                    scale=500/n)
     l, r, b, t = plt.axis()
     dx, dy = r - l, t - b
@@ -97,28 +97,25 @@ def rotate_plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axi
             u[i][j] = r_value*np.cos(a_value + a)
             v[i][j] = r_value*np.sin(a_value + a)
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-
-    quiver_(x, z, u, v, m)
     return u, v, m
 
 
-def summ_fields(x, z, uh, vh, ur, vr):
+def summ_fields(x, z, uh, vh, ur, vr, case):
     """
     Two cases.
     """
-    v = vr + vh
-    u = ur + uh
-    m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    quiver_(x, z, u, v, m, 8)
-
-    v = -vr + vh
-    u = -ur + uh
-    m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    quiver_(x, z, u, v, m, 8)
+    if case == 1:
+        v = vr + vh
+        u = ur + uh
+        m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    else:
+        v = -vr + vh
+        u = -ur + uh
+        m = np.sqrt(np.power(u, 2) + np.power(v, 2))
     return u, v, m
 
 
-def main():
+def main(case=True):
     """
     Calc and show shock wavep, lasmoid, rotated plasmoid and its summ with the shock wave in two cases.
     """
@@ -139,7 +136,8 @@ def main():
 
     plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2)
     ur, vr, mr = rotate_plasmoid(num, x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.30, x_axis=-6.0, z_axis=-3.0)
-    summ_fields(x, z, uh, vh, ur, vr)
+    u, v, m = summ_fields(x, z, uh, vh, ur, vr, case)
+    return x, z, u, v, m
 
 
 if __name__ == "__main__":
