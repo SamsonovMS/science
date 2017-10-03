@@ -1,7 +1,6 @@
 """
 Particle tracing.
-See https://docs.google.com/document/d/
-1Uebu5muzgRV0MCNWihRWR2x5Dqxgk6k5Sj-HnUkoc_M/edit#heading=h.51eqdmgucqiq
+See
 """
 
 import numpy as np
@@ -25,7 +24,7 @@ def fun(t, _y, f_args):
     Plasmoid is rotated around a point (x_axis, z_axis) on the corner angle.
     """
     x, y, z, w_x, w_y, w_z = _y
-    delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis = f_args
+    delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis, case = f_args
     e_x = 0.0
     e_y = 0.0
     e_z = 0.0
@@ -34,13 +33,13 @@ def fun(t, _y, f_args):
     a_point = np.arctan(float(z - z_axis) / (x - x_axis))
     x_plasm = x_axis + r_point * np.cos(a_point - angle)
     z_plasm = z_axis + r_point * np.sin(a_point - angle)
-    b_x = np.tanh(float(z_plasm) / d)
+    b_x = case * np.tanh(float(z_plasm) / d)
     b_y = 0.0
     b_z = np.tanh(x / dh)  # shock wave
     if x_plasm < XM: # change +/- here
-        b_z += -bz0 * np.tanh((x_plasm - XO) / dx1)
+        b_z += - case * bz0 * np.tanh((x_plasm - XO) / dx1)
     else:
-        b_z += bz2 * np.tanh((x_plasm - XNL) / dx2)
+        b_z += case * bz2 * np.tanh((x_plasm - XNL) / dx2)
     r_value = np.sqrt(np.power(b_x, 2) + np.power(b_z, 2))
     a_value = np.arctan(b_z / b_x)
     if b_x < 0:
@@ -53,7 +52,7 @@ def fun(t, _y, f_args):
             (e_z + delta * (b_y * w_x - w_y * b_x)) / theta]
 
 
-def traces(n_steps=300, n_part=1, t_coeff=0.5):
+def traces(case, n_steps=300, n_part=1, t_coeff=0.5):
     """
     Main function to calc trajectories.
 
@@ -82,7 +81,7 @@ def traces(n_steps=300, n_part=1, t_coeff=0.5):
     x_axis = -6.0
     z_axis = 0.0
     bz2 = bz0 * np.tanh((XM - XO) / dx1) / np.tanh((XNL - XM) / dx2)
-    f_args = (delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis)
+    f_args = (delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis, case)
     solver.set_f_params(f_args)
 
     # Create the array `t` of time values at which to compute
@@ -97,7 +96,7 @@ def traces(n_steps=300, n_part=1, t_coeff=0.5):
         # Set the initial value _y(0) = _y0.
         _y0 = [[] for j in range(6)]
         _y0[:3] = 10 * (np.random.random_sample(3) - np.random.random_sample(3))
-        _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)) / 10
+        _y0[3] = (np.random.random_sample(1)*4 - np.random.random_sample(1)) / 10
         _y0[4:] = (np.random.random_sample(2) - np.random.random_sample(2)) / 10
         solver.set_initial_value(_y0, 0.0)
 
