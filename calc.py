@@ -1,6 +1,6 @@
 """
 Particle tracing.
-See full explanation https://docs.google.com/document/d/
+See https://docs.google.com/document/d/
 1Uebu5muzgRV0MCNWihRWR2x5Dqxgk6k5Sj-HnUkoc_M/edit#heading=h.51eqdmgucqiq
 """
 
