@@ -10,7 +10,7 @@ import convert
 import fields
 
 
-case = -1
+case = 1
 num = [400, 0, 200]
 x = np.linspace(-30, 60, num=num[0])
 z = np.linspace(-25, 40, num=num[2])
