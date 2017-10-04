@@ -22,15 +22,15 @@ def quiver_(x, z, u, v, m, n=8, scale=False):
     xgrid, ygrid = np.meshgrid(x, z)
     contour = plt.contour(xgrid, ygrid, m)
     plt.clabel(contour, colors = 'k', fmt = '%2.1f', fontsize=12)
+    plt.savefig('field.png')
     plt.show()
-    #plt.streamplot(x[::n], z[::n], U[::n, ::n], V[::n, ::n])
-    #plt.show()
+    # plt.streamplot(x[::n], z[::n], U[::n, ::n], V[::n, ::n])
+    # plt.show()
 
 
-def shock_wave(num, x, z, dh=0.75, n=10, scale=300):
+def shock_wave(num, x, z, dh):
     """
     Harris 1964 model.
-    :return:
     """
     bzh = np.tanh(x/dh)
     u, v = np.meshgrid(x, z)
@@ -53,7 +53,6 @@ def plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2):
     :param xo: 7.0
     :param xm: 12.0
     :param xnl: 15.0
-    :return:
     """
     bx = np.tanh(z/d)
     bz = np.zeros(len(x))
@@ -72,7 +71,7 @@ def plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2):
     return u, v, m
 
 
-def rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axis=-6.0, z_axis=0.0):
+def rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a, x_axis, z_axis):
     """
     Rotation of plasmoid around (x_axis, z_axis) on angle a.
     """
@@ -116,23 +115,12 @@ def summ_fields(uh, vh, ur, vr, case):
     return u, v, m
 
 
-def main(num, x, z, case):
+def main(num, x, z, case, dh, d, dx1, dx2, bz0, xo, xm, xnl, bz2, angle, x_axis, z_axis):
     """
     Calc and show shock wave, plasmoid, rotated plasmoid and its summ with the shock wave in two cases.
     """
-    uh, vh, mh = shock_wave(num, x, z, dh=0.75, n=10, scale=300)
-
-    d = 0.75
-    dx1 = 5.0
-    dx2 = 1.0
-    bz0 = 1.0
-    xo = 7.0
-    xm = 12.0
-    xnl = 15.0
-    bz2 = bz0 * np.tanh((xm - xo) / dx1) / np.tanh((xnl - xm) / dx2)
-
-    plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2)
-    ur, vr, mr = rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=-np.pi/6, x_axis=-6.0, z_axis=-3.0)
+    uh, vh, mh = shock_wave(num, x, z, dh)
+    ur, vr, mr = rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, angle, x_axis, z_axis)
     u, v, m = summ_fields(uh, vh, ur, vr, case)
     return u, v, m
 

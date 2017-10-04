@@ -36,7 +36,7 @@ def fun(t, _y, f_args):
     b_x = case * np.tanh(float(z_plasm) / d)
     b_y = 0.0
     b_z = np.tanh(x / dh)  # shock wave
-    if x_plasm < XM: # change +/- here
+    if x_plasm < XM:
         b_z += - case * bz0 * np.tanh((x_plasm - XO) / dx1)
     else:
         b_z += case * bz2 * np.tanh((x_plasm - XNL) / dx2)
@@ -52,13 +52,13 @@ def fun(t, _y, f_args):
             (e_z + delta * (b_y * w_x - w_y * b_x)) / theta]
 
 
-def traces(case, n_steps=300, n_part=2, t_coeff=0.5):
+def traces(case, n_steps, n_part, t_koeff, *f_args):
     """
     Main function to calc trajectories.
 
     :param n_steps: number of time steps
     :param n_part: number of particles
-    :param t_coeff: max time = n_steps*t_coeff
+    :param t_koeff: max time = n_steps*t_coeff
     :return: trajectories in 6D for all time steps
     """
     # Create an `ode` instance to solve the system of differential
@@ -67,26 +67,11 @@ def traces(case, n_steps=300, n_part=2, t_coeff=0.5):
     solver.set_integrator('dopri5')
     # Give the value of delta and theta to the solver. This is passed to
     # `fun` when the solver calls it.
-    delta = 1.0
-    theta = 1.0
-    dh = 0.75
-    d = 0.75
-    dx1 = 5.0
-    dx2 = 1.0
-    bz0 = 1.0  # ?
-    XO = 7.0  # ?
-    XM = 12.0
-    XNL = 15.0
-    angle = 0.24
-    x_axis = -6.0
-    z_axis = 0.0
-    bz2 = bz0 * np.tanh((XM - XO) / dx1) / np.tanh((XNL - XM) / dx2)
-    f_args = (delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis, case)
     solver.set_f_params(f_args)
 
     # Create the array `t` of time values at which to compute
     # the solution.
-    max_time = n_steps*t_coeff
+    max_time = n_steps * t_koeff
     t = np.linspace(0.0, max_time, n_steps)
 
     # Create an array to hold the solutions.
@@ -96,7 +81,7 @@ def traces(case, n_steps=300, n_part=2, t_coeff=0.5):
         # Set the initial value _y(0) = _y0.
         _y0 = [[] for j in range(6)]
         _y0[:3] = 10 * (np.random.random_sample(3) - np.random.random_sample(3))
-        _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)*4) / 3
+        _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)*3) / 6
         _y0[4:] = (np.random.random_sample(2) - np.random.random_sample(2)) / 10
         solver.set_initial_value(_y0, 0.0)
 
@@ -121,7 +106,7 @@ def traces(case, n_steps=300, n_part=2, t_coeff=0.5):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
 
-    plt.savefig('1.png')
+    plt.savefig('trajectories.png')
     plt.show()
 
     return sol
