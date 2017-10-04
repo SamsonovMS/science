@@ -1,0 +1,3 @@
+"""
+Write constants to txt.
+"""
