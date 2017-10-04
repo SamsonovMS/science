@@ -98,7 +98,6 @@ def rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a=0.24, x_axis=-6.
             u[i][j] = r_value*np.cos(a_value + a)
             v[i][j] = r_value*np.sin(a_value + a)
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    quiver_(x, z, u, v, m)
     return u, v, m
 
 

@@ -52,7 +52,7 @@ def fun(t, _y, f_args):
             (e_z + delta * (b_y * w_x - w_y * b_x)) / theta]
 
 
-def traces(case, n_steps=300, n_part=1, t_coeff=0.5):
+def traces(case, n_steps=300, n_part=2, t_coeff=0.5):
     """
     Main function to calc trajectories.
 
@@ -111,15 +111,17 @@ def traces(case, n_steps=300, n_part=1, t_coeff=0.5):
             sol[i][k] = solver.y
             k += 1
 
-
     # Plot the solutions.
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
+
     for i in range(n_part):
         ax.scatter(sol[i][:, 0][::2], sol[i][:, 1][::2], sol[i][:, 2][::2], s=0.05)
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
+
+    plt.savefig('1.png')
     plt.show()
 
     return sol

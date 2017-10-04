@@ -4,11 +4,20 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.animation
 import pandas as pd
+from os import chdir, makedirs
+import datetime
 # my modules
 import calc
 import convert
 import fields
+import c
+import info
 
+
+# Make new folder for each run
+name = str(datetime.datetime.now()).split('.')[0]
+makedirs(c.path + name)
+chdir(c.path + name)
 
 case = 1
 num = [400, 0, 200]
@@ -20,7 +29,7 @@ fields.quiver_(x, z, u, v, m)
 
 xx, yy, zz = convert.field_to_surface(num, x, z, m)
 
-n_steps = 300
+n_steps = 30
 n_part = 5 # > 1
 
 a = convert.sol_to_xyz(calc.traces(case, n_steps=n_steps, n_part=n_part), n_steps, n_part)
@@ -33,13 +42,13 @@ def update_graph(num):
     data = df[df['time'] == num]
     graph.set_data(data.x, data.y)
     graph.set_3d_properties(data.z)
-    title.set_text('3D Test, step={}'.format(num))
+    title.set_text('step={}'.format(num))
     return title, graph
 
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-title = ax.set_title('3D Test')
+title = ax.set_title('')
 
 data = df[df['time'] == 0]
 graph, = ax.plot(data.x, data.y, data.z, linestyle="", marker="o")
