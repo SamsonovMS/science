@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def quiver_(x, z, u, v, m, n=8, scale=False):
+def quiver_(x, z, u, v, m, n=8, scale=False, name="field"):
     """
     Function for visualisations.
     """
@@ -22,7 +22,7 @@ def quiver_(x, z, u, v, m, n=8, scale=False):
     xgrid, ygrid = np.meshgrid(x, z)
     contour = plt.contour(xgrid, ygrid, m)
     plt.clabel(contour, colors = 'k', fmt = '%2.1f', fontsize=12)
-    plt.savefig('field.png')
+    plt.savefig(name + '.png')
     plt.show()
     # plt.streamplot(x[::n], z[::n], U[::n, ::n], V[::n, ::n])
     # plt.show()
@@ -97,6 +97,7 @@ def rotate_plasmoid(x, z, d, dx1, dx2, bz0, xo, xm, xnl, bz2, a, x_axis, z_axis)
             u[i][j] = r_value*np.cos(a_value + a)
             v[i][j] = r_value*np.sin(a_value + a)
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    quiver_(x, z, u, v, m, name="ratated plasmoid")
     return u, v, m
 
 

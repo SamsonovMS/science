@@ -20,17 +20,17 @@ makedirs(c.path + name)
 chdir(c.path + name)
 
 # Constants
-case = 1
+case = -1
 num = [400, 0, 200]
 min_x = -30
 max_x = 60
-min_z = -25
+min_z = -40
 max_z = 40
 x = np.linspace(min_x, max_x, num=num[0])
 z = np.linspace(min_z, max_z, num=num[2])
 
-n_steps = 10
-n_part = 2 # > 1
+n_steps = 500
+n_part = 500  # > 1
 t_koeff = 0.5 # bigger => more calculations
 delta = 1.0
 theta = 1.0
