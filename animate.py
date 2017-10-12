@@ -20,7 +20,7 @@ makedirs(c.path + name)
 chdir(c.path + name)
 
 # Constants
-case = -1
+case = 1
 num = [400, 0, 200]
 min_x = -30
 max_x = 60
@@ -29,7 +29,7 @@ max_z = 40
 x = np.linspace(min_x, max_x, num=num[0])
 z = np.linspace(min_z, max_z, num=num[2])
 
-n_steps = 500
+n_steps = 600
 n_part = 500  # > 1
 t_koeff = 0.5 # bigger => more calculations
 delta = 1.0
@@ -41,11 +41,11 @@ dx1 = 5.0
 dx2 = 1.0
 bz0 = 1.0
 xo = 7.0
-xm = 12.0
-xnl = 15.0
+xm = 25.0
+xnl = 45.0
 bz2 = bz0 * np.tanh((xm - xo) / dx1) / np.tanh((xnl - xm) / dx2)
 
-angle = np.pi/4
+angle = -np.pi/6
 x_axis = -1.0
 z_axis = 0.0
 
