@@ -1,6 +1,5 @@
 """
 Particle tracing.
-See
 """
 
 import numpy as np
@@ -21,25 +20,21 @@ def fun(t, _y, f_args):
     dw_y/dt = (E_y + delta*(b_x*w_z - w_x*b_z))/theta
     dw_z/dt = (E_z + delta*(b_y*w_x - w_y*b_x))/theta
     
-    Plasmoid is rotated around a point (x_axis, z_axis) on the corner angle.
+    Current sheet is rotated around a point (x_axis, z_axis) on the corner angle.
     """
     x, y, z, w_x, w_y, w_z = _y
-    delta, theta, dh, d, dx1, dx2, bz0, XO, XM, XNL, bz2, angle, x_axis, z_axis, case = f_args
+    delta, theta, dh, dz, angle, x_axis, z_axis, case = f_args
     e_x = 0.0
     e_y = 0.0
     e_z = 0.0
     # take rotation into account
     r_point = np.sqrt(np.power(x - x_axis, 2) + np.power(z - z_axis, 2))
     a_point = np.arctan(float(z - z_axis) / (x - x_axis))
-    x_plasm = x_axis + r_point * np.cos(a_point - angle)
-    z_plasm = z_axis + r_point * np.sin(a_point - angle)
-    b_x = case * np.tanh(float(z_plasm) / d)
+    z_cs = z_axis + r_point * np.sin(a_point - angle)
+    b_x = 0.0
     b_y = 0.0
     b_z = np.tanh(x / dh)  # shock wave
-    if x_plasm < XM:
-        b_z += - case * bz0 * np.tanh((x_plasm - XO) / dx1)
-    else:
-        b_z += case * bz2 * np.tanh((x_plasm - XNL) / dx2)
+    b_x += - case * np.tanh(z_cs / dz) # rotated current sheet
     r_value = np.sqrt(np.power(b_x, 2) + np.power(b_z, 2))
     a_value = np.arctan(b_z / b_x)
     if b_x < 0:

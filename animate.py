@@ -1,3 +1,4 @@
+# coding=utf-8
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
@@ -22,29 +23,20 @@ chdir(c.path + name)
 # Constants
 case = 1
 num = [400, 0, 200]
-min_x = -30
-max_x = 60
-min_z = -40
-max_z = 40
+min_x = -10
+max_x = 6
+min_z = -4
+max_z = 4
 x = np.linspace(min_x, max_x, num=num[0])
 z = np.linspace(min_z, max_z, num=num[2])
 
-n_steps = 600
-n_part = 500  # > 1
-t_koeff = 0.5 # bigger => more calculations
-delta = 1.0
-theta = 1.0
-
-dh = 0.75
-d = 0.75
-dx1 = 5.0
-dx2 = 1.0
-bz0 = 1.0
-xo = 7.0
-xm = 25.0
-xnl = 45.0
-bz2 = bz0 * np.tanh((xm - xo) / dx1) / np.tanh((xnl - xm) / dx2)
-
+n_steps = 300
+n_part = 50  # > 1
+t_koeff = 0.5 # time of particle movement for one step. Bigger — larger trajectories and more rude results
+delta = 0.245
+theta = 1.0 # ion mass / proton mass
+dh = 0.085
+dz = 0.25
 angle = -np.pi/6
 x_axis = -1.0
 z_axis = 0.0
@@ -52,15 +44,14 @@ z_axis = 0.0
 # Write constants to constants.txt
 info.write_constants(case=case, num=num, min_x=min_x, max_x=max_x, min_z=min_z, max_z=max_z,
                      n_steps=n_steps, n_part=n_part, t_koeff=t_koeff, delta=delta, theta=theta,
-                     dh=dh, d=d, dx1=dx1, dx2=dx2, bz0=bz0, xo=xo, xm=xm, xnl=xnl, bz2=bz2,
-                     angle=angle, x_axis=x_axis, z_axis=z_axis)
+                     dh=dh, dz=dz, angle=angle, x_axis=x_axis, z_axis=z_axis)
 
 # Calc, show and save png of total field of shock wave and rotated plasmoid
-u, v, m = fields.main(num, x, z, case, dh, d, dx1, dx2, bz0, xo, xm, xnl, bz2, angle, x_axis, z_axis)
+u, v, m = fields.main(x, z, case, dh, dz, angle, x_axis, z_axis)
 fields.quiver_(x, z, u, v, m)
 
 # Calc, show and save png of trajectories
-sol = calc.traces(case, n_steps, n_part, t_koeff, delta, theta, dh, d, dx1, dx2, bz0, xo, xm, xnl, bz2,
+sol = calc.traces(case, n_steps, n_part, t_koeff, delta, theta, dh, dz,
                   angle, x_axis, z_axis, case)
 xyz = convert.sol_to_xyz(sol, n_steps, n_part)
 
