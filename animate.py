@@ -21,23 +21,23 @@ makedirs(c.path + name)
 chdir(c.path + name)
 
 # Constants
-case = 1
+case = -1
 num = [400, 0, 200]
-min_x = -10
-max_x = 6
-min_z = -4
-max_z = 4
+min_x = -100
+max_x = 60
+min_z = -40
+max_z = 40
 x = np.linspace(min_x, max_x, num=num[0])
 z = np.linspace(min_z, max_z, num=num[2])
 
-n_steps = 300
+n_steps = 200
 n_part = 50  # > 1
 t_koeff = 0.5 # time of particle movement for one step. Bigger — larger trajectories and more rude results
 delta = 0.245
 theta = 1.0 # ion mass / proton mass
 dh = 0.085
 dz = 0.25
-angle = -np.pi/6
+angle = np.pi/6
 x_axis = -1.0
 z_axis = 0.0
 
@@ -51,7 +51,7 @@ u, v, m = fields.main(x, z, case, dh, dz, angle, x_axis, z_axis)
 fields.quiver_(x, z, u, v, m)
 
 # Calc, show and save png of trajectories
-sol = calc.traces(case, n_steps, n_part, t_koeff, delta, theta, dh, dz,
+sol = calc.traces(n_steps, n_part, t_koeff, delta, theta, dh, dz,
                   angle, x_axis, z_axis, case)
 xyz = convert.sol_to_xyz(sol, n_steps, n_part)
 

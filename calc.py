@@ -7,6 +7,43 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from mpl_toolkits.mplot3d import Axes3D
 from scipy.integrate import ode
+from scipy.stats import maxwell
+
+
+def init_xyz(n_part, box=[[15.0, 16.0], [-1.0, 1.0], [-1.0, 1.0]]):
+    """
+    Initial positions of particles.
+
+    :param n_part: number of particles.
+    :return: array of positions (n_part, 3).
+    """
+    ret = np.zeros((n_part, 3))
+    thickness = [el[1] - el[0] for el in box]
+    for i in range(3):
+        for j, el in enumerate(np.random.rand(n_part)):
+            ret[j][i] = el*thickness[i] + box[i][0]
+    return ret
+
+
+def init_vel(n_part, v_mean=[1, 0.062, 0.062]):
+    """
+    Maxwell for radial and perpendicular (thermal) initial velocities.
+    Since OX points to the Sun, vx should be negative.
+    Since mean value = 2*scale*sqrt(2/pi), I'll put v_mean/1.59577 as scale.
+
+    :param n_part: number of particles.
+    :param v_mean: list of 3 mean velocities x, y, z. 0.062 = 35/(400*sqrt(2))
+    :return: array of velocities (n_part, 3).
+    """
+    ret = np.zeros((n_part, 3))
+    for i in range(3):
+        for j, el in enumerate(maxwell.rvs(scale=v_mean[i]/1.59577, size=n_part)):
+            ret[j][i] = el
+            if i == 0:
+                ret[j][i] *= -1
+            elif np.random.randint(2): # some particles should have negative vy or vz or both
+                ret[j][i] *= -1
+    return ret
 
 
 def fun(t, _y, f_args):
@@ -20,7 +57,7 @@ def fun(t, _y, f_args):
     dw_y/dt = (E_y + delta*(b_x*w_z - w_x*b_z))/theta
     dw_z/dt = (E_z + delta*(b_y*w_x - w_y*b_x))/theta
     
-    Current sheet is rotated around a point (x_axis, z_axis) on the corner angle.
+    Current sheet is rotated around the point (x_axis, z_axis) on the corner angle.
     """
     x, y, z, w_x, w_y, w_z = _y
     delta, theta, dh, dz, angle, x_axis, z_axis, case = f_args
@@ -47,13 +84,13 @@ def fun(t, _y, f_args):
             (e_z + delta * (b_y * w_x - w_y * b_x)) / theta]
 
 
-def traces(case, n_steps, n_part, t_koeff, *f_args):
+def traces(n_steps, n_part, t_koeff, *f_args):
     """
     Main function to calc trajectories.
 
     :param n_steps: number of time steps
     :param n_part: number of particles
-    :param t_koeff: max time = n_steps*t_coeff
+    :param t_koeff: max time = n_steps*t_koeff
     :return: trajectories in 6D for all time steps
     """
     # Create an `ode` instance to solve the system of differential
@@ -72,12 +109,17 @@ def traces(case, n_steps, n_part, t_koeff, *f_args):
     # Create an array to hold the solutions.
     sol = [np.empty((n_steps, 6)) for j in range(n_part)]
 
+    # Initialize positions
+    xyz = init_xyz(n_part)
+
+    # Initialize maxwell velocities
+    v = init_vel(n_part)
+
     for i in range(n_part):
         # Set the initial value _y(0) = _y0.
         _y0 = [[] for j in range(6)]
-        _y0[:3] = 10 * (np.random.random_sample(3) - np.random.random_sample(3))
-        _y0[3] = (np.random.random_sample(1) - np.random.random_sample(1)*3) / 6
-        _y0[4:] = (np.random.random_sample(2) - np.random.random_sample(2)) / 10
+        _y0[:3] = xyz[i]
+        _y0[3:] = v[i]
         solver.set_initial_value(_y0, 0.0)
 
         # Put the initial value in the solutions array.
@@ -105,3 +147,21 @@ def traces(case, n_steps, n_part, t_koeff, *f_args):
     plt.show()
 
     return sol
+
+
+def show_hist(values, coord=0):
+    """
+    Show histogram of values.
+
+    :param values: array(n_part, 3)
+    """
+    fig, ax = plt.subplots(1, 1)
+    buf = []
+    for el in values:
+        buf.append(el[coord])
+    ax.hist(buf, normed=False, histtype='stepfilled', alpha=0.2, bins=100)
+    plt.show()
+
+
+if __name__ == "__main__":
+    show_hist(init_xyz(10000), 2)
