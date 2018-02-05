@@ -21,23 +21,23 @@ makedirs(c.path + name)
 chdir(c.path + name)
 
 # Constants
-case = -1
+case = [1, -1] # directions of currents in the [shock wave, current sheet]. 1 — on us, -1 — from us. => directions of B.
 num = [400, 0, 200]
-min_x = -100
-max_x = 60
-min_z = -40
-max_z = 40
+min_x = -5
+max_x = 5
+min_z = -5
+max_z = 5
 x = np.linspace(min_x, max_x, num=num[0])
 z = np.linspace(min_z, max_z, num=num[2])
 
 n_steps = 200
-n_part = 50  # > 1
+n_part = 1000  # > 1
 t_koeff = 0.5 # time of particle movement for one step. Bigger — larger trajectories and more rude results
 delta = 0.245
 theta = 1.0 # ion mass / proton mass
-dh = 0.085
-dz = 0.25
-angle = np.pi/6
+dh = 0.0423
+dz = 0.489
+angle = np.pi/3
 x_axis = -1.0
 z_axis = 0.0
 
@@ -48,7 +48,6 @@ info.write_constants(case=case, num=num, min_x=min_x, max_x=max_x, min_z=min_z, 
 
 # Calc, show and save png of total field of shock wave and rotated plasmoid
 u, v, m = fields.main(x, z, case, dh, dz, angle, x_axis, z_axis)
-fields.quiver_(x, z, u, v, m)
 
 # Calc, show and save png of trajectories
 sol = calc.traces(n_steps, n_part, t_koeff, delta, theta, dh, dz,

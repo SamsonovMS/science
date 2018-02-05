@@ -10,7 +10,7 @@ from scipy.integrate import ode
 from scipy.stats import maxwell
 
 
-def init_xyz(n_part, box=[[15.0, 16.0], [-1.0, 1.0], [-1.0, 1.0]]):
+def init_xyz(n_part, box=[[0.0, 5.0], [-3.0, 3.0], [-3.0, 3.0]]):
     """
     Initial positions of particles.
 
@@ -62,22 +62,25 @@ def fun(t, _y, f_args):
     x, y, z, w_x, w_y, w_z = _y
     delta, theta, dh, dz, angle, x_axis, z_axis, case = f_args
     e_x = 0.0
-    e_y = 0.0
+    e_y = -0.489
     e_z = 0.0
-    # take rotation into account
+    b_y = 0.0
+    b_z = 0.0
+    # Add rotated current sheet (it should be exactly the same as in fields.py!).
     r_point = np.sqrt(np.power(x - x_axis, 2) + np.power(z - z_axis, 2))
     a_point = np.arctan(float(z - z_axis) / (x - x_axis))
+    if x < x_axis:
+        a_point += np.pi
     z_cs = z_axis + r_point * np.sin(a_point - angle)
-    b_x = 0.0
-    b_y = 0.0
-    b_z = np.tanh(x / dh)  # shock wave
-    b_x += - case * np.tanh(z_cs / dz) # rotated current sheet
+    b_x = np.tanh(z_cs / dz)  # not rotated current sheet
     r_value = np.sqrt(np.power(b_x, 2) + np.power(b_z, 2))
     a_value = np.arctan(b_z / b_x)
     if b_x < 0:
-        a_value = np.pi + a_value
-    b_x = r_value*np.cos(a_value + angle)
-    b_z = r_value*np.sin(a_value + angle)
+        a_value += np.pi
+    b_x = - case[1] * r_value * np.cos(a_value + angle)
+    b_z = - case[1] * r_value * np.sin(a_value + angle)
+    # Add shock wave.
+    b_z += case[0] * np.tanh(x / dh)  # shock wave
     return [w_x, w_y, w_z,
             (e_x + delta * (b_z * w_y - w_z * b_y)) / theta,
             (e_y + delta * (b_x * w_z - w_x * b_z)) / theta,

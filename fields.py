@@ -24,11 +24,11 @@ def quiver_(x, z, u, v, m, n=8, scale=False, name="field"):
     plt.clabel(contour, colors = 'k', fmt = '%2.1f', fontsize=12)
     plt.savefig(name + '.png')
     plt.show()
-    # plt.streamplot(x[::n], z[::n], U[::n, ::n], V[::n, ::n])
-    # plt.show()
+    #plt.streamplot(x[::n], z[::n], u[::n, ::n], v[::n, ::n])
+    #plt.show()
 
 
-def shock_wave(x, z, dh):
+def shock_wave(x, z, dh, case):
     """
     Harris 1964 model.
     """
@@ -38,7 +38,10 @@ def shock_wave(x, z, dh):
         for j in range(len(x)):
             u[i][j] = 0.0
             v[i][j] = bz[j]
+    u *= case[0]
+    v *= case[0]
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    #quiver_(x, z, u, v, m, name="shock wave")
     return u, v, m
 
 
@@ -54,11 +57,11 @@ def current_sheet(x, z, dz):
             u[i][j] = bx[i]
             v[i][j] = 0.0
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    quiver_(x, z, u, v, m, name="ratated plasmoid")
+    #quiver_(x, z, u, v, m, name="ratated plasmoid")
     return u, v, m
 
 
-def rotate_current_sheet(x, z, dz, a, x_axis, z_axis):
+def rotate_current_sheet(x, z, dz, a, x_axis, z_axis, case):
     """
     Rotation of plasmoid around (x_axis, z_axis) on angle a.
     """
@@ -67,35 +70,33 @@ def rotate_current_sheet(x, z, dz, a, x_axis, z_axis):
         for j in range(len(x)):
             r_point = np.sqrt(np.power(x[j] - x_axis, 2)\
                               + np.power(z[i] - z_axis, 2))
-            a_point = np.arctan(float(z[i] - z_axis)/(x[j] - x_axis))
+            a_point = np.arctan(float(z[i] - z_axis) / (x[j] - x_axis))
             if x[j] < x_axis:
                 a_point += np.pi
-            z_cs = z_axis + r_point*np.sin(a_point - a)
-            b_x = np.tanh(float(z_cs)/dz)
+            z_cs = z_axis + r_point * np.sin(a_point - a)
+            b_x = np.tanh(z_cs / dz)
             b_z = 0.0
             r_value = np.sqrt(np.power(b_x, 2) + np.power(b_z, 2))
-            a_value = np.arctan(b_z/b_x)
+            a_value = np.arctan(b_z / b_x)
             if b_x < 0:
-                a_value = np.pi + a_value
-            u[i][j] = r_value*np.cos(a_value + a)
-            v[i][j] = r_value*np.sin(a_value + a)
+                a_value += np.pi
+            u[i][j] = r_value * np.cos(a_value + a)
+            v[i][j] = r_value * np.sin(a_value + a)
+    u *= case[1] * (-1)
+    v *= case[1] * (-1)
     m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    quiver_(x, z, u, v, m, name="ratated plasmoid")
+    #quiver_(x, z, u, v, m, name="rotated current sheet")
     return u, v, m
 
 
-def summ_fields(uh, vh, ur, vr, case):
+def summ_fields(x, z, uh, vh, ur, vr):
     """
-    Two cases.
+    One of 4 possible cases.
     """
-    if case == 1:
-        v = vr + vh
-        u = ur + uh
-        m = np.sqrt(np.power(u, 2) + np.power(v, 2))
-    else:
-        v = -vr + vh
-        u = -ur + uh
-        m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    v = vh + vr
+    u = uh + ur
+    m = np.sqrt(np.power(u, 2) + np.power(v, 2))
+    quiver_(x, z, u, v, m, name="summ fields")
     return u, v, m
 
 
@@ -103,16 +104,16 @@ def main(x, z, case, dh, dz, angle, x_axis, z_axis):
     """
     Calc and show shock wave, plasmoid, rotated plasmoid and its summ with the shock wave in two cases.
     """
-    uh, vh, mh = shock_wave(x, z, dh)
-    ur, vr, mr = rotate_current_sheet(x, z, dz, angle, x_axis, z_axis)
-    u, v, m = summ_fields(uh, vh, ur, vr, case)
+    uh, vh, mh = shock_wave(x, z, dh, case)
+    ur, vr, mr = rotate_current_sheet(x, z, dz, angle, x_axis, z_axis, case)
+    u, v, m = summ_fields(x, z, uh, vh, ur, vr)
     return u, v, m
 
 
 if __name__ == "__main__":
     print("run fields.py")
 
-    case = 1
+    case = [1, -1]
     num = [400, 0, 200]
     min_x = -30
     max_x = 60
